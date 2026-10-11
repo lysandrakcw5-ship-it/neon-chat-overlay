@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Neon Chat Overlay</title>
+<title>Halloween Neon Chat Overlay</title>
 <style>
   :root {
-    --purple: #b56cff;
-    --purple-bright: #d8a5ff;
-    --text: #f8f4ff;
-    --muted: #c9b8df;
+    --purple: #a9a9b2;
+    --purple-bright: #f0f0f3;
+    --orange: #c9c9cf;
+    --text: #f7f7f8;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -18,63 +18,94 @@
     font-family: Inter, "Segoe UI", Arial, sans-serif;
   }
   body { color: var(--text); }
+  /* Floating Halloween accessories */
+  .decor {
+    position: fixed; z-index: 2; pointer-events: none; user-select: none;
+    filter: drop-shadow(0 0 8px rgba(220,220,226,.58));
+    animation: bob 4s ease-in-out infinite;
+  }
+  .moon { top: 28px; left: 28px; font-size: 42px; animation-duration: 5.5s; }
+  .bat { top: 78px; left: 95px; font-size: 27px; animation-delay: -.8s; }
+  .pumpkin { bottom: 24px; left: 24px; font-size: 34px; animation-delay: -1.5s; }
+  .spider { top: 24px; right: 28px; font-size: 27px; animation-delay: -2.2s; }
+  .ghost { right: 28px; bottom: 26px; font-size: 35px; animation-delay: -1s; }
+  .spark { color: #e5e5e8; text-shadow: 0 0 10px #eeeeef; }
+  @keyframes bob { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-9px) rotate(5deg); } }
+
   #chat {
-    position: absolute; left: 28px; bottom: 28px;
+    position: absolute; left: 28px; bottom: 78px;
     width: min(470px, calc(100vw - 56px));
     display: flex; flex-direction: column; gap: 10px;
-    align-items: stretch;
+    align-items: stretch; z-index: 3;
   }
   .message {
-    width: fit-content; max-width: 100%;
-    padding: 11px 15px 12px;
-    border: 1px solid rgba(181,108,255,.46);
-    border-left: 3px solid var(--purple);
+    position: relative; width: fit-content; max-width: 100%;
+    padding: 12px 15px 13px;
+    border: 1px solid rgba(220,220,226,.42);
+    border-left: 3px solid #d7d7dc;
     border-radius: 4px 14px 14px 4px;
-    background: linear-gradient(105deg, rgba(17,10,28,.82), rgba(30,14,48,.68));
-    box-shadow: 0 0 14px rgba(159,77,255,.17), inset 0 0 18px rgba(181,108,255,.045);
+    background: linear-gradient(105deg, rgba(8,8,10,.92), rgba(43,43,48,.88));
+    box-shadow: 0 0 16px rgba(255,255,255,.07), 0 0 8px rgba(255,255,255,.035), inset 0 0 18px rgba(255,255,255,.025);
     backdrop-filter: blur(7px);
-    animation: enter .42s cubic-bezier(.2,.8,.2,1) both;
+    animation: enter .48s cubic-bezier(.2,.8,.2,1) both;
     overflow-wrap: anywhere;
+  }
+  .message::after {
+    content: "✦"; position: absolute; right: 9px; top: 5px;
+    color: rgba(230,230,235,.8); font-size: 11px;
+    text-shadow: 0 0 8px rgba(255,255,255,.25);
   }
   .name {
     color: var(--purple-bright); font-size: 13px; font-weight: 800;
-    letter-spacing: .035em; margin-bottom: 4px;
-    text-shadow: 0 0 9px rgba(181,108,255,.7);
+    letter-spacing: .045em; margin-bottom: 4px;
+    text-shadow: 0 0 9px rgba(255,255,255,.22);
   }
-  .text { font-size: 17px; line-height: 1.35; color: var(--text); }
+  .name::before { content: "☾ "; color: #d5d5da; }
+  .text { font-size: 17px; line-height: 1.35; color: var(--text); padding-right: 8px; }
   .message.leaving { animation: leave .35s ease-in forwards; }
   @keyframes enter {
-    from { opacity: 0; transform: translateX(-22px) translateY(7px); filter: blur(3px); }
+    from { opacity: 0; transform: translateX(-22px) translateY(7px); filter: blur(4px); }
     to { opacity: 1; transform: translateX(0) translateY(0); filter: blur(0); }
   }
-  @keyframes leave {
-    to { opacity: 0; transform: translateX(-15px); filter: blur(2px); }
-  }
-  /* Demo controls are only visible in normal preview, never in overlay URL mode. */
+  @keyframes leave { to { opacity: 0; transform: translateX(-15px); filter: blur(2px); } }
+
   #demo {
     position: fixed; right: 16px; top: 16px; z-index: 20;
     display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;
     max-width: calc(100vw - 32px);
   }
   #demo button {
-    border: 1px solid rgba(200,151,255,.65); border-radius: 10px;
-    background: rgba(20,10,32,.92); color: #f8edff; padding: 9px 12px;
-    font-weight: 700; cursor: pointer; box-shadow: 0 0 15px #8c38d633;
+    border: 1px solid rgba(230,230,235,.5); border-radius: 10px;
+    background: rgba(20,10,32,.94); color: #f8f8fa; padding: 9px 12px;
+    font-weight: 700; cursor: pointer; box-shadow: 0 0 15px #ffffff14;
   }
-  #demo button:hover { background: rgba(70,28,104,.95); }
-  body.overlay #demo { display: none; }
-  body.preview #chat { bottom: 28px; }
+  #demo button:hover { background: rgba(65,65,72,.95); }
   #hint {
     position: fixed; left: 16px; top: 16px; max-width: 330px;
-    color: #d8c7eb; font-size: 12px; line-height: 1.4;
-    background: rgba(12,8,19,.8); border: 1px solid #7540a355;
-    border-radius: 10px; padding: 10px 12px;
+    color: #dedee2; font-size: 12px; line-height: 1.4;
+    background: rgba(12,8,19,.84); border: 1px solid #bdbdc533;
+    border-radius: 10px; padding: 10px 12px; z-index: 20;
   }
-  body.overlay #hint { display: none; }
+  body.overlay #demo, body.overlay #hint { display: none; }
+  body.overlay .moon { top: 18px; left: 20px; }
+  body.overlay .spider { top: 16px; right: 20px; }
+  @media (max-width: 520px) {
+    #chat { left: 18px; bottom: 66px; width: calc(100vw - 36px); }
+    .moon { font-size: 32px; left: 14px; }
+    .spider { right: 14px; }
+  }
 </style>
 </head>
 <body class="preview">
-  <div id="hint">PREVIEW MODE · Klik “Tambah chat” untuk tes. Untuk overlay transparan, tambahkan <b>?overlay</b> di akhir URL.</div>
+  <div class="decor moon" aria-hidden="true">🌙</div>
+  <div class="decor bat" aria-hidden="true">🦇</div>
+  <div class="decor spider" aria-hidden="true">🕷️</div>
+  <div class="decor pumpkin" aria-hidden="true">🎃</div>
+  <div class="decor ghost" aria-hidden="true">👻</div>
+  <div class="decor spark" style="top:42%;left:22px;font-size:16px" aria-hidden="true">✦</div>
+  <div class="decor spark" style="top:34%;right:32px;font-size:13px;animation-delay:-2s" aria-hidden="true">✧</div>
+
+  <div id="hint">MONO HALLOWEEN PREVIEW 🎃 · Klik “Tambah chat” untuk tes. Untuk overlay transparan, tambahkan <b>?overlay</b> di akhir URL.</div>
   <div id="demo">
     <button id="add">＋ Tambah chat</button>
     <button id="auto">▶ Demo otomatis</button>
@@ -91,14 +122,14 @@
   const autoBtn = document.getElementById('auto');
   const clearBtn = document.getElementById('clear');
   const samples = [
-    ['iby_gendud', 'HALOOO 💜'],
-    ['moonlit.exe', 'overlay-nya lucu banget'],
-    ['kurokami', 'wih efek neon ✨'],
-    ['lilacdream', 'semangat stream-nya!'],
-    ['voidbunni', '💜💜💜'],
-    ['noxxie', 'sound check satu dua'],
-    ['mika.zip', 'hai chattt'],
-    ['pixelghost', 'keren parah sih']
+    ['iby_gendud', 'HALOOO, welcome to the spooky stream 🎃'],
+    ['moonlit.exe', 'overlay-nya spooky banget 🦇'],
+    ['kurokami', 'wih efek neon ungu ✨'],
+    ['lilacdream', 'happy halloween, chat! 👻'],
+    ['voidbunni', '💜🕸️💜'],
+    ['noxxie', 'sound check satu dua... BOO!'],
+    ['mika.zip', 'hai chattt 🌙'],
+    ['pixelghost', 'keren parah sih 🎃']
   ];
   let sampleIndex = 0;
   let timer = null;
@@ -115,7 +146,7 @@
     item.append(n, t);
     chat.appendChild(item);
 
-    while (chat.children.length > 6) {
+    while (chat.children.length > 5) {
       const oldest = chat.firstElementChild;
       oldest.classList.add('leaving');
       setTimeout(() => oldest.remove(), 360);
@@ -127,7 +158,6 @@
       setTimeout(() => item.remove(), 360);
     }, 14000);
   }
-
   function addSample() {
     const [name, message] = samples[sampleIndex % samples.length];
     sampleIndex++;
@@ -146,16 +176,14 @@
   autoBtn.addEventListener('click', () => {
     if (timer) { stopAuto(); return; }
     addSample();
-    timer = setInterval(addSample, 1800);
+    timer = setInterval(addSample, 1900);
     autoBtn.textContent = 'Ⅱ Hentikan demo';
   });
-
   if (params.has('overlay')) {
-    // In overlay mode, run a small looping demo so the URL can be tested in streaming software.
     addSample();
     timer = setInterval(addSample, 2600);
   } else {
-    addMessage('system', 'Preview siap — coba klik Tambah chat.');
+    addMessage('system', 'Spooky monochrome mode… klik Tambah chat untuk tes. 🕸️');
   }
 })();
 </script>

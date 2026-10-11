@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neon Chat Overlay</title>
+<style>
+  :root {
+    --purple: #b56cff;
+    --purple-bright: #d8a5ff;
+    --text: #f8f4ff;
+    --muted: #c9b8df;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; width: 100%; height: 100%;
+    background: transparent; overflow: hidden;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+  }
+  body { color: var(--text); }
+  #chat {
+    position: absolute; left: 28px; bottom: 28px;
+    width: min(470px, calc(100vw - 56px));
+    display: flex; flex-direction: column; gap: 10px;
+    align-items: stretch;
+  }
+  .message {
+    width: fit-content; max-width: 100%;
+    padding: 11px 15px 12px;
+    border: 1px solid rgba(181,108,255,.46);
+    border-left: 3px solid var(--purple);
+    border-radius: 4px 14px 14px 4px;
+    background: linear-gradient(105deg, rgba(17,10,28,.82), rgba(30,14,48,.68));
+    box-shadow: 0 0 14px rgba(159,77,255,.17), inset 0 0 18px rgba(181,108,255,.045);
+    backdrop-filter: blur(7px);
+    animation: enter .42s cubic-bezier(.2,.8,.2,1) both;
+    overflow-wrap: anywhere;
+  }
+  .name {
+    color: var(--purple-bright); font-size: 13px; font-weight: 800;
+    letter-spacing: .035em; margin-bottom: 4px;
+    text-shadow: 0 0 9px rgba(181,108,255,.7);
+  }
+  .text { font-size: 17px; line-height: 1.35; color: var(--text); }
+  .message.leaving { animation: leave .35s ease-in forwards; }
+  @keyframes enter {
+    from { opacity: 0; transform: translateX(-22px) translateY(7px); filter: blur(3px); }
+    to { opacity: 1; transform: translateX(0) translateY(0); filter: blur(0); }
+  }
+  @keyframes leave {
+    to { opacity: 0; transform: translateX(-15px); filter: blur(2px); }
+  }
+  /* Demo controls are only visible in normal preview, never in overlay URL mode. */
+  #demo {
+    position: fixed; right: 16px; top: 16px; z-index: 20;
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;
+    max-width: calc(100vw - 32px);
+  }
+  #demo button {
+    border: 1px solid rgba(200,151,255,.65); border-radius: 10px;
+    background: rgba(20,10,32,.92); color: #f8edff; padding: 9px 12px;
+    font-weight: 700; cursor: pointer; box-shadow: 0 0 15px #8c38d633;
+  }
+  #demo button:hover { background: rgba(70,28,104,.95); }
+  body.overlay #demo { display: none; }
+  body.preview #chat { bottom: 28px; }
+  #hint {
+    position: fixed; left: 16px; top: 16px; max-width: 330px;
+    color: #d8c7eb; font-size: 12px; line-height: 1.4;
+    background: rgba(12,8,19,.8); border: 1px solid #7540a355;
+    border-radius: 10px; padding: 10px 12px;
+  }
+  body.overlay #hint { display: none; }
+</style>
+</head>
+<body class="preview">
+  <div id="hint">PREVIEW MODE · Klik “Tambah chat” untuk tes. Untuk overlay transparan, tambahkan <b>?overlay</b> di akhir URL.</div>
+  <div id="demo">
+    <button id="add">＋ Tambah chat</button>
+    <button id="auto">▶ Demo otomatis</button>
+    <button id="clear">Bersihkan</button>
+  </div>
+  <main id="chat" aria-live="polite"></main>
+<script>
+(() => {
+  const params = new URLSearchParams(location.search);
+  if (params.has('overlay')) document.body.className = 'overlay';
+
+  const chat = document.getElementById('chat');
+  const addBtn = document.getElementById('add');
+  const autoBtn = document.getElementById('auto');
+  const clearBtn = document.getElementById('clear');
+  const samples = [
+    ['iby_gendud', 'HALOOO 💜'],
+    ['moonlit.exe', 'overlay-nya lucu banget'],
+    ['kurokami', 'wih efek neon ✨'],
+    ['lilacdream', 'semangat stream-nya!'],
+    ['voidbunni', '💜💜💜'],
+    ['noxxie', 'sound check satu dua'],
+    ['mika.zip', 'hai chattt'],
+    ['pixelghost', 'keren parah sih']
+  ];
+  let sampleIndex = 0;
+  let timer = null;
+
+  function addMessage(name, message) {
+    const item = document.createElement('article');
+    item.className = 'message';
+    const n = document.createElement('div');
+    n.className = 'name';
+    n.textContent = name;
+    const t = document.createElement('div');
+    t.className = 'text';
+    t.textContent = message;
+    item.append(n, t);
+    chat.appendChild(item);
+
+    while (chat.children.length > 6) {
+      const oldest = chat.firstElementChild;
+      oldest.classList.add('leaving');
+      setTimeout(() => oldest.remove(), 360);
+      break;
+    }
+    setTimeout(() => {
+      if (!item.isConnected) return;
+      item.classList.add('leaving');
+      setTimeout(() => item.remove(), 360);
+    }, 14000);
+  }
+
+  function addSample() {
+    const [name, message] = samples[sampleIndex % samples.length];
+    sampleIndex++;
+    addMessage(name, message);
+  }
+  addBtn.addEventListener('click', addSample);
+  clearBtn.addEventListener('click', () => {
+    stopAuto();
+    chat.replaceChildren();
+  });
+  function stopAuto() {
+    if (timer) clearInterval(timer);
+    timer = null;
+    autoBtn.textContent = '▶ Demo otomatis';
+  }
+  autoBtn.addEventListener('click', () => {
+    if (timer) { stopAuto(); return; }
+    addSample();
+    timer = setInterval(addSample, 1800);
+    autoBtn.textContent = 'Ⅱ Hentikan demo';
+  });
+
+  if (params.has('overlay')) {
+    // In overlay mode, run a small looping demo so the URL can be tested in streaming software.
+    addSample();
+    timer = setInterval(addSample, 2600);
+  } else {
+    addMessage('system', 'Preview siap — coba klik Tambah chat.');
+  }
+})();
+</script>
+</body>
+</html>
